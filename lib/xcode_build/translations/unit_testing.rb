@@ -20,22 +20,16 @@ EXPLANATION
           when /^(.*)\:(.*)\: warning\: (Skipping tests; .*)$/
             notify_build_error($1, $2, 0, "#{$3}\n#{RUN_UNIT_TESTS_ERROR}")
           when /^(.*) (Unknown Device Type.*)$/
-            notify_build_warning(nil, 0, 0, $2)
+            # don't report this warning
+            # notify_build_warning(nil, 0, 0, $2)
           when /^(Terminating since .*)$/
             notify_build_error(nil, 0, 0, "#{$1}\n#{TERMINATING_SINCE_THERE_IS_NO_WORKSPACE_EXPLANATION}")
-          when /^Test Case .*started\.$/
-            puts
-            puts line
-            #notify_delegate(:test_step_started, :args => [{
-            #                                          :message => line
-            #                                      }])
-          when /^Test Case .*$/
-            puts line
-            #notify_delegate(:test_step, :args => [{
-            #                                          :message => line
-            #                                      }])
           when /(.*)\:(\d+)\: error\: (.*)/
-            notify_build_error($1, $2, 0, $3)
+            file, lineno, message = $1, $2, $3
+            # don't report the summary failure
+            if not file.end_with? 'RunPlatformUnitTests.include'
+              notify_build_error(file, lineno, 0, message)
+            end
         end
       end
 
